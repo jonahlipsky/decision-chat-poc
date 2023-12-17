@@ -1,9 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
+	"os"
+	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/bedrockruntime"
 )
@@ -19,14 +23,19 @@ type Llama2Response struct {
 }
 
 func main() {
-	mySession := session.Must(session.NewSession())
+	mySession := session.Must(session.NewSession(&aws.Config{Region: aws.String("us-east-1")}))
 	svc := bedrockruntime.New(mySession)
 
 	modelId := "meta.llama2-13b-chat-v1"
 	var input string
 	fmt.Print("Initial Input:")
 	for {
-		fmt.Scan(&input)
+		inputReader := bufio.NewReader(os.Stdin)
+		input, _ = inputReader.ReadString('\n')
+		input = strings.TrimSuffix(input, "\n")
+		if input == "BREAK" {
+			break
+		}
 
 		body, err := json.Marshal(Llama2Request{
 			Prompt:       input,
