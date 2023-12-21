@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -35,7 +36,7 @@ type InputPrompt struct {
 	Prompt string `json:"prompt"`
 }
 
-func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	mySession := session.Must(session.NewSession())
 	svc := bedrockruntime.New(mySession)
 
@@ -49,7 +50,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 	var errorresp string
 
-	if err := json.Unmarshal([]byte(request.Body), input); err != nil {
+	if err := json.Unmarshal([]byte(request.Body), &input); err != nil {
 		errorresp = fmt.Sprintf("Unable to unmarshal request body: %s", request.Body)
 		return events.APIGatewayProxyResponse{badrequest, headers, multiheaders, string(errorresp), false}, err
 	}
