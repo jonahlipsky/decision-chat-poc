@@ -21,14 +21,14 @@ import (
 // 	ErrNon200Response = errors.New("non 200 response found")
 // )
 
-type Llama2Request struct {
-	Prompt       string  `json:"prompt"`
-	MaxGenLength int     `json:"max_gen_len,omitempty"`
-	Temperature  float64 `json:"temperature,omitempty"`
+type ClaudeRequest struct {
+	Prompt            string  `json:"prompt"`
+	MaxTokensToSample int     `json:"max_tokens_to_sample"`
+	Temperature       float64 `json:"temperature,omitempty"`
 }
 
-type Llama2Response struct {
-	Generation string `json:"generation"`
+type ClaudeResponse struct {
+	Completion string `json:"completion"`
 }
 
 type InputPrompt struct {
@@ -39,17 +39,17 @@ func handler(ctx context.Context, event *InputPrompt) (*string, error) {
 	mySession := session.Must(session.NewSession())
 	svc := bedrockruntime.New(mySession)
 
-	modelId := "meta.llama2-13b-chat-v1"
+	modelId := "anthropic.claude-v2"
 
-	body, err := json.Marshal(Llama2Request{
-		Prompt:       event.Prompt,
-		MaxGenLength: 512,
-		Temperature:  0.5,
+	body, err := json.Marshal(ClaudeRequest{
+		Prompt:            event.Prompt,
+		MaxTokensToSample: 4000,
+		Temperature:       0.5,
 	})
 
 	var errorresp string
 	if err != nil {
-		errorresp = fmt.Sprintf("Unable to Marshal Llama2Request: %s", event.Prompt)
+		errorresp = fmt.Sprintf("Unable to Marshal request: %s", event.Prompt)
 		return &errorresp, err
 	}
 
@@ -62,13 +62,13 @@ func handler(ctx context.Context, event *InputPrompt) (*string, error) {
 		return &errorresp, err
 	}
 
-	var response Llama2Response
+	var response ClaudeResponse
 	if err := json.Unmarshal(resp.Body, &response); err != nil {
-		errorresp = "Unable to Unmarshal Llama2Response."
+		errorresp = "Unable to Unmarshal ClaudeResponse."
 		return &errorresp, err
 	}
 
-	return &response.Generation, nil
+	return &response.Completion, nil
 }
 
 func main() {
