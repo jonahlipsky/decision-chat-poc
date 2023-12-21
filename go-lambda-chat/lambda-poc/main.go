@@ -36,12 +36,12 @@ type InputPrompt struct {
 	Prompt string `json:"prompt"`
 }
 
-// IDEA: TRY CREATING AN EVENT WHERE THE BODY IS ASSIGNED THE TYPE OF INPUT PROMPT.
-// MAYBE GO WILL UNMARSHAL IT FOR ME AS PART OF THE HANDLER EXECUTION.
-
-// THERE SEEMED TO BE A DIFFERENCE IN BEHAVIOR WHEN I SUPPLIED 'body' AS THE TOP
-// LEVEL JSON KEY POINTING TO AN OBJECT OF STRUCTURE InputPrompt.
-
+// Note that body has to be a stringified json of the InputPrompt structure
+// i.e.
+//
+//	{
+//		"body": "{ \n  \"prompt\": \"Human: ...\\n\\nAssistant:\"\n}"
+//	}
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	log.Printf("Lambda invoked. Body: %s", request.Body)
 	mySession := session.Must(session.NewSession())
