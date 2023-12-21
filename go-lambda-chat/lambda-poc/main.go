@@ -1,9 +1,9 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -36,7 +36,14 @@ type InputPrompt struct {
 	Prompt string `json:"prompt"`
 }
 
-func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+// IDEA: TRY CREATING AN EVENT WHERE THE BODY IS ASSIGNED THE TYPE OF INPUT PROMPT.
+// MAYBE GO WILL UNMARSHAL IT FOR ME AS PART OF THE HANDLER EXECUTION.
+
+// THERE SEEMED TO BE A DIFFERENCE IN BEHAVIOR WHEN I SUPPLIED 'body' AS THE TOP
+// LEVEL JSON KEY POINTING TO AN OBJECT OF STRUCTURE InputPrompt.
+
+func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	log.Printf("Lambda invoked. Body: %s", request.Body)
 	mySession := session.Must(session.NewSession())
 	svc := bedrockruntime.New(mySession)
 
@@ -44,17 +51,19 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	var input InputPrompt
 
 	// NOTE: COME BACK TO THIS FOR SECURITY CONCERNS
-	headers := map[string]string{"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept"}
+	headers := map[string]string{"Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept"}
 	multiheaders := map[string][]string{}
 	badrequest := 400
 
 	var errorresp string
 
+	log.Printf("Attempting to unmarshal request body: %s", string(request.Body))
 	if err := json.Unmarshal([]byte(request.Body), &input); err != nil {
 		errorresp = fmt.Sprintf("Unable to unmarshal request body: %s", request.Body)
 		return events.APIGatewayProxyResponse{badrequest, headers, multiheaders, string(errorresp), false}, err
 	}
 
+	log.Print("Attempting to marshal request.")
 	body, err := json.Marshal(ClaudeRequest{
 		Prompt:            input.Prompt,
 		MaxTokensToSample: 4000,
@@ -70,11 +79,13 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 		ModelId: &modelId, Body: body,
 	})
 
+	log.Print("Attempting to send invocation.")
 	if err := req.Send(); err != nil {
 		errorresp = "Error sending model invocation."
 		return events.APIGatewayProxyResponse{badrequest, headers, multiheaders, string(errorresp), false}, err
 	}
 
+	log.Print("Attempting to unmarshal response.")
 	var response ClaudeResponse
 	if err := json.Unmarshal(resp.Body, &response); err != nil {
 		errorresp = "Unable to Unmarshal ClaudeResponse."
