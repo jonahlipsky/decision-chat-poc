@@ -26,7 +26,9 @@ export default function Chat() {
     const result: string[] = [];
     // need to handle the first one which won't split on the sequence
     pairs.forEach((pair, idx) => {
-      if (idx != 0) {
+      if (idx == 0) {
+        pair = pair.replace("Human:", "System Prompt:")
+      } else {
         pair = "Human:" + pair;
       }
       const separatedReqResp = pair.split("\n\nAssistant:");
@@ -79,22 +81,22 @@ export default function Chat() {
       {status === "error" && (
         <p className="text-red-500 mb-5">{errorMessage}</p>
       )}
-      <div>
-        <textarea
-          className="text-black"
-          disabled={status === "submitted" || status === "submitting"}
-          value={userInput}
-          onChange={(ev: React.ChangeEvent<HTMLTextAreaElement>): void =>
-            setUserInput(ev.target.value)
-          }
-        />
-        <button
-          disabled={status === "submitted" || status === "submitting"}
-          onClick={handleSubmitResponse}
-        >
-          Submit Response
-        </button>
-      </div>
+      <textarea
+        className="text-black w-full mb-5 rounded-md p-1"
+        disabled={status === "submitted" || status === "submitting"}
+        placeholder="Your response here..."
+        value={userInput}
+        onChange={(ev: React.ChangeEvent<HTMLTextAreaElement>): void =>
+          setUserInput(ev.target.value)
+        }
+      />
+      <button
+        className="border rounded-md border-white p-1"
+        disabled={status === "submitted" || status === "submitting"}
+        onClick={handleSubmitResponse}
+      >
+        Submit Response
+      </button>
     </div>
   );
 }
