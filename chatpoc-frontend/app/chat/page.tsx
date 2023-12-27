@@ -50,10 +50,11 @@ export default function Chat() {
     if (status == "submitted") {
       setStatus("submitting");
       const nextPrompt = fullConversation + "\n\nHuman: " + userInput;
-
+      console.log(`next prompt: ${nextPrompt}`)
       continueChat(nextPrompt).then(function (
         response: ICompletionWithFulltext
       ) {
+        console.log(`response: ${response}`)
         if (response.message) {
           setErrorMessage(response.message);
           setStatus("error");
