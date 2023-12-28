@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { startChat, continueChat } from "../actions";
+import { startChat, continueChat } from "../utilities";
 import { ICompletionWithFulltext } from "@/app/types";
 
 export default function Chat() {
