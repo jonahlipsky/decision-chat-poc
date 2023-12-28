@@ -4,7 +4,6 @@ import { getInitialPrompt, getApiEndpoint } from "./actions";
 
 export async function startChat() {
   const initialPrompt = await getInitialPrompt();
-  console.log(`initialPrompt ${initialPrompt}`)
   return await continueChat(initialPrompt);
 }
 
@@ -15,7 +14,6 @@ export async function continueChat(prompt: string) {
     prompt: prompt + "\n\nAssistant:",
   });
   
-  console.log(`apiUrl ${apiUrl}`)
   return fetch(url, {
     method: "POST",
     headers: {
@@ -27,7 +25,6 @@ export async function continueChat(prompt: string) {
       return response.json();
     })
     .then(function (data: IClaudeCompletion) {
-      console.log(`data: ${data}`)
       if (data.stop_reason && data.stop_reason != "stop_sequence") {
         const fullErrorResponse: ICompletionWithFulltext = {
           fullText: prompt,
