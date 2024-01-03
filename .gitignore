@@ -1,1 +1,3 @@
 test_convos
+.tf/.terraform*
+.tf/terraform.*
