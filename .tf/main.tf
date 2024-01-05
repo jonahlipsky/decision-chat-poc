@@ -1,4 +1,5 @@
 # Thanks https://spacelift.io/blog/terraform-api-gateway
+# and https://dev.to/esenac/deploy-an-aws-lambda-function-in-go-with-terraform-12ap
 
 resource "aws_api_gateway_rest_api" "chat_poc_api" {
   name = "chat-poc-api-terraform"
@@ -29,7 +30,8 @@ resource "aws_api_gateway_integration" "lambda_integration" {
   resource_id = aws_api_gateway_resource.chat_poc_api_root.id
   http_method = aws_api_gateway_method.chat_poc_api_post.http_method
   integration_http_method = "POST"
-  type = "MOCK"
+  type = "AWS_PROXY"
+  uri = aws_lambda_function.initial_chat_lambda.invoke_arn
 }
 
 resource "aws_api_gateway_method_response" "chat_poc_api_post" {
@@ -69,7 +71,7 @@ resource "aws_api_gateway_integration" "options_integration" {
 
 ### DEPLOYMENT ###
 
-resource "aws_api_gateway_deployment" "deployment" {
+resource "aws_api_gateway_deployment" "initial_chat_api" {
   depends_on = [
     aws_api_gateway_integration.lambda_integration,
     aws_api_gateway_integration.options_integration, # Add this line
@@ -78,3 +80,15 @@ resource "aws_api_gateway_deployment" "deployment" {
   rest_api_id = aws_api_gateway_rest_api.chat_poc_api.id
   stage_name = "dev"
 }
+
+### LAMBDA ###
+
+resource "aws_lambda_function" "initial_chat_lambda" {
+  filename = var.initial_chat_lambda_zipfile_path
+  function_name = "initialChat"
+  role = var.lambda_bedrock_dev_role_arn
+  handler = "bootstrap"
+  runtime = "provided.al2023"
+  timeout = var.lambda_bedrock_timeout
+}
+
