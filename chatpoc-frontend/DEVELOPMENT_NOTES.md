@@ -1,5 +1,8 @@
 # Development Notes
 
+## 5 Jan 2023
+I was thinking again about how it might be too limited of an idea to build something around the notion of decision making itself. Perhaps the only way to make this useful is to take as broad an approach as possible. I suppose that's the horizontal model. The problem with that is that various capabilities that that would offer are already available, and the allure of the variety will wear off in time -- I think it has already started to in our society. Rather, a vertical approach has the opportunity to see how cultivated we can get in a single dimension. If that worked, as outlined below, it could potentially be replicated in another dimension, but to try to evolve a single area is what would differentiate this right now. It might be too narrow, but it's interesting and different.
+
 ## 3 Jan 2023
 Poe.com already has a full-fledged multi-topic way of conversing with multifarious chatbots. This liberates me from the idea that I should create a place where people can discuss various things with various chatbots. Instead, this can be focused on decision making.
 
