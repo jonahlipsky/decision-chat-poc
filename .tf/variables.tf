@@ -1,7 +1,7 @@
 variable "initial_chat_lambda_zipfile_path" {
   description = "Name of zipped lambda file for initial chat"
   type = string
-  default = "../go-lambda-chat/lambda-poc/chatPocFunction-v0.0.4.zip"
+  default = "../go-lambda-chat/lambda-poc/chatPocFunction-v0.0.5.zip"
 }
 
 variable "lambda_bedrock_dev_role_arn" {
