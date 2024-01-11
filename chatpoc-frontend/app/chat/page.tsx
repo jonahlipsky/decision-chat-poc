@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { startChat, continueChat } from "../utilities";
 import { ICompletionWithFulltext } from "@/app/types";
+import { getInitialPrompt } from "../actions";
 
 export default function Chat() {
   const defaultAllTextState: string[] = ["Loading..."];

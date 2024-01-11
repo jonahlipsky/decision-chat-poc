@@ -1,6 +1,6 @@
 "use client";
 import { IClaudeCompletion, ICompletionWithFulltext } from "@/app/types";
-import { getInitialPrompt, getApiEndpoint, getApiKey } from "./actions";
+import { getInitialPrompt, getApiEndpoint } from "./actions";
 
 export async function startChat() {
   const initialPrompt = await getInitialPrompt();
@@ -9,7 +9,7 @@ export async function startChat() {
 
 export async function continueChat(prompt: string) {
   const apiUrl = await getApiEndpoint();
-  const apiKey = await getApiKey();
+  // const apiKey = await getApiKey();
   const url: URL = new URL(apiUrl);
   const modelPrompt = JSON.stringify({
     prompt: prompt + "\n\nAssistant:",
@@ -19,7 +19,7 @@ export async function continueChat(prompt: string) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-Api-Key": apiKey
+      // "X-Api-Key": apiKey
     },
     body: modelPrompt,
   })
