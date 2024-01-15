@@ -86,7 +86,7 @@ export default function Home() {
     }
   }, [status]);
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="not-small:grid not-small:grid-cols-2 not-small:gap-4">
       <div>
         <p className="mb-5">
           This is an experimental A.I. chat application that provides feedback
