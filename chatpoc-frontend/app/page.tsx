@@ -88,7 +88,7 @@ export default function Home() {
           trying to make; then you can judge for yourself the quality of its
           response. Click the following button to start a chat about decision
           making or start your own by entering text to the right and hitting
-          'submit'.
+          &apos;submit&apos;.
         </p>
         <button
           disabled={decisionChat}
