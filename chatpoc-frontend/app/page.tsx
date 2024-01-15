@@ -4,14 +4,20 @@ import { startChat, continueChat } from "./utilities";
 import { ICompletionWithFulltext } from "@/app/types";
 
 export default function Home() {
-  const defaultAllTextState: string[] = ["Enter text and submit."];
+  const defaultAllTextState: string[] = [
+    "Or, you can enter your own prompt to talk to Claude 2:",
+  ];
 
   const [errorMessage, setErrorMessage] = useState("");
   const [fullConversation, setFullConversation] = useState("");
   const [alltext, setAllText] = useState(defaultAllTextState);
   const [userInput, setUserInput] = useState("");
   const [status, setStatus] = useState("typing"); // typing, submitted, submitting, error
-  const [decisionChat, setDecisionChat] = useState(false);
+
+  const DECISIONSTATE: string = "decision-chat";
+  const WAITINGSTATE: string = "waiting";
+  const FREECHATSTATE: string = "free-chat";
+  const [chatState, setChatState] = useState(WAITINGSTATE); // waiting, free-chat, decision-chat
 
   function handleSubmitResponse(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
@@ -22,13 +28,19 @@ export default function Home() {
   }
 
   function splitConversation(fullText: string): string[] {
+    // This relies on the first human prompt not including the \n\n pattern.
+    // That makes it a little brittle.
+
     const pairs = fullText.split("\n\nHuman:");
     const result: string[] = [];
     // need to handle the first one which won't split on the sequence
+
     pairs.forEach((pair, idx) => {
-      if (idx == 0 && decisionChat) {
+      // Basically, only change "human" to "system prompt"
+      // if they've selected the decision chat.
+      if (idx == 0 && chatState == DECISIONSTATE) {
         pair = pair.replace("Human:", "System Prompt:");
-      } else {
+      } else if (idx != 0) {
         pair = "Human:" + pair;
       }
 
@@ -39,16 +51,8 @@ export default function Home() {
     return result;
   }
 
-  // useEffect(() => {
-  //   startChat().then(function (response: ICompletionWithFulltext) {
-  //     const splitFulltext = splitConversation(response.fullText);
-  //     setAllText([...splitFulltext]);
-  //     setFullConversation(response.fullText);
-  //   });
-  // }, []);
-
-  async function startNewChat() {
-    setDecisionChat(true);
+  async function startDecisionChat() {
+    setChatState(DECISIONSTATE);
     startChat().then(function (response: ICompletionWithFulltext) {
       const splitFulltext = splitConversation(response.fullText);
       setAllText([...splitFulltext]);
@@ -59,7 +63,12 @@ export default function Home() {
   useEffect(() => {
     if (status == "submitted") {
       setStatus("submitting");
-      const nextPrompt = fullConversation + "\n\nHuman: " + userInput;
+      let humanPrefix: string = "\n\nHuman: ";
+      if (chatState === WAITINGSTATE) {
+        humanPrefix = "Human: ";
+        setChatState(FREECHATSTATE);
+      }
+      const nextPrompt = fullConversation + humanPrefix + userInput;
       continueChat(nextPrompt).then(function (
         response: ICompletionWithFulltext
       ) {
@@ -88,12 +97,12 @@ export default function Home() {
           trying to make; then you can judge for yourself the quality of its
           response. Click the following button to start a chat about decision
           making or start your own by entering text to the right and hitting
-          &apos;submit&apos;.
+          &apos;submit&apos;. You can refresh the page to reset.
         </p>
         <button
-          disabled={decisionChat}
+          hidden={chatState != WAITINGSTATE}
           className="border border-cyan-300 p-1 rounded-md text-cyan-300"
-          onClick={startNewChat}
+          onClick={startDecisionChat}
         >
           Chat About Decisions
         </button>
