@@ -5,7 +5,7 @@ import { ICompletionWithFulltext } from "@/app/types";
 
 export default function Home() {
   const defaultAllTextState: string[] = [
-    "Or, you can enter your own prompt to talk to Claude 2:",
+    "Enter your own text here to talk to Claude 2:",
   ];
 
   const [errorMessage, setErrorMessage] = useState("");
