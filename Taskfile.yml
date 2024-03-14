@@ -1,4 +1,6 @@
 version: 3
+env:
+  S3_BUCKET: decisionchat
 tasks:
   hello:
     cmds:
@@ -6,3 +8,9 @@ tasks:
   install_dependencies:
     cmds:
       - cd python-lambda && pip3 install -r requirements.txt --target package
+
+  upload_initial:
+    env:
+      FILENAME: initial.json
+    cmds:
+      - aws s3 cp $FILENAME s3://$S3_BUCKET/$FILENAME
