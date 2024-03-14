@@ -1,0 +1,8 @@
+version: 3
+tasks:
+  hello:
+    cmds:
+      - echo 'Hello World from Task!'
+  install_dependencies:
+    cmds:
+      - cd python-lambda && pip3 install -r requirements.txt --target package

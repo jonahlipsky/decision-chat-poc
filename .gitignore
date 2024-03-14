@@ -1,3 +1,5 @@
 test_convos
 .tf/.terraform*
 .tf/terraform.*
+python-lambda/package
+initial.json
