@@ -1,6 +1,10 @@
 version: 3
 env:
   S3_BUCKET: decisionchat
+  BEDROCK_INVOCATION_ROLE: arn:aws:iam::442848236251:role/chat-bedrock-poc
+  HAIKU_FN_NAME: HaikuPoc
+  HAIKU_ZIP_NAME: claude-haiku-lambda.zip
+  LAMBDA_FN_LOCATION: lambda-zips/
 tasks:
   hello:
     cmds:
@@ -16,11 +20,15 @@ tasks:
       - aws s3 cp $FILENAME s3://$S3_BUCKET/$FILENAME
 
   zip_python_lambda:
-    env:
-      ZIP_NAME: claude-haiku-lambda.zip
     cmds: 
       - cd python-lambda && pip3 install -r requirements.txt --target ./package
-      - cd python-lambda && zip -r $ZIP_NAME .
-      - mv python-lambda/$ZIP_NAME ./lambda-zips/
+      - cd python-lambda && zip -r $HAIKU_ZIP_NAME .
+      - mv python-lambda/$HAIKU_ZIP_NAME $LAMBDA_FN_LOCATION
 
-  update_python_lambda:
+  create_python_lambda:
+    cmds:
+      - aws lambda create-function --function-name $HAIKU_FN_NAME --zip-file fileb://$LAMBDA_FN_LOCATION$HAIKU_ZIP_NAME --handler lambda_function.lambda_handler --runtime python3.12 --role $BEDROCK_INVOCATION_ROLE
+
+  update_python_lambda_code:
+    cmds: 
+      - aws lambda update-function-code --function-name $HAIKU_FN_NAME --zip-file fileb://$LAMBDA_FN_LOCATION$HAIKU_ZIP_NAME

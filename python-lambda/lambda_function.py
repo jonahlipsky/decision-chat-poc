@@ -2,6 +2,9 @@ from package import boto3
 import json 
 
 def lambda_handler(event, context):
+  if event['test']:
+    return { "body": "Hello World" }
+  
   s3 = boto3.client('s3')
   s3_response = s3.get_object(Bucket='decisionchat', Key='initial.json')
   prompt_json = json.loads(s3_response['Body'].read())
