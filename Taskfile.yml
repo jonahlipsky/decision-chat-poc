@@ -16,7 +16,11 @@ tasks:
       - aws s3 cp $FILENAME s3://$S3_BUCKET/$FILENAME
 
   zip_python_lambda:
-    cmds:
-      - 
+    env:
+      ZIP_NAME: claude-haiku-lambda.zip
+    cmds: 
+      - cd python-lambda && pip3 install -r requirements.txt --target ./package
+      - cd python-lambda && zip -r $ZIP_NAME .
+      - mv python-lambda/$ZIP_NAME ./lambda-zips/
 
   update_python_lambda:
