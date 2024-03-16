@@ -5,11 +5,39 @@ def lambda_handler(event, context):
   s3 = boto3.client('s3')
   s3_response = s3.get_object(Bucket='decisionchat', Key='initial.json')
   prompt_json = json.loads(s3_response['Body'].read())
+  full_prompt = assemble_prompt(prompt_json)
+  bedrock_runtime = boto3.client('bedrock-runtime')
+  body = haiku_input_body(full_prompt)
+  # print_models()
+  model_id = "anthropic.claude-3-haiku-20240307-v1:0"
+  response = bedrock_runtime.invoke_model(modelId=model_id, body=json.dumps(body))
+  result = json.loads(response.get("body").read())
+  # print_output(result)
+  return result
 
 def print_anthropic_models(available_models):
   for output in available_models['modelSummaries']:
     if 'anthropic' in output['modelArn']:
       print(output)
+
+def haiku_input_body(prompt):
+  return {
+    "anthropic_version": "bedrock-2023-05-31",
+    "max_tokens": 4096,
+    "messages": [
+      {
+          "role": "user",
+          "content": [{"type": "text", "text": prompt}],
+      }
+    ],
+  }
+
+def assemble_prompt(prompt_json):
+  first_part = 'promptPartOne'
+  text = 'text'
+  second_part = 'promptPartTwo'
+  result = prompt_json[first_part] + prompt_json[text] + prompt_json[second_part]
+  return result
 
 def print_output(result):
   input_tokens = result["usage"]["input_tokens"]
@@ -24,30 +52,18 @@ def print_output(result):
   for output in output_list:
       print(output["text"])
 
+def print_models():
+  bedrock = boto3.client('bedrock')
+  available_models = bedrock.list_foundation_models()
+  print_anthropic_models(available_models)
+
 if __name__ == '__main__':
-  first_part = 'promptPartOne'
-  text = 'text'
-  second_part = 'promptPartTwo'
-  content_type = 'application/json'
   file = open('../initial.json')
   prompt_json = json.load(file)
-  full_prompt = prompt_json[first_part] + prompt_json[text] + prompt_json[second_part]
+  full_prompt = assemble_prompt(prompt_json)
   bedrock_runtime = boto3.client('bedrock-runtime')
-  bedrock = boto3.client('bedrock')
-  body = {
-    "anthropic_version": "bedrock-2023-05-31",
-    "max_tokens": 4096,
-    "messages": [
-      {
-          "role": "user",
-          "content": [{"type": "text", "text": full_prompt}],
-      }
-    ],
-  }
-
-  # available_models = bedrock.list_foundation_models()
-  # print_anthropic_models(available_models)
-
+  body = haiku_input_body(full_prompt)
+  # print_models()
   model_id = "anthropic.claude-3-haiku-20240307-v1:0"
   response = bedrock_runtime.invoke_model(modelId=model_id, body=json.dumps(body))
   result = json.loads(response.get("body").read())

@@ -14,3 +14,9 @@ tasks:
       FILENAME: initial.json
     cmds:
       - aws s3 cp $FILENAME s3://$S3_BUCKET/$FILENAME
+
+  zip_python_lambda:
+    cmds:
+      - 
+
+  update_python_lambda:
