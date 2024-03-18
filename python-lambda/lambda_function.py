@@ -2,8 +2,15 @@ from package import boto3
 import json 
 
 def lambda_handler(event, context):
-  if 'text' in event:
-    return { "body": "Hello World" }
+  event_json = json.loads(event['body'])
+  if 'test' in event_json:
+    return { 
+      'statusCode': 200,  
+      'isBase64Encoded': False,
+      'headers': { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }, 
+      'multiValueHeaders': {},
+      'body': "hello world"
+    }
   else:
       print(f"event: {event}")
       print(f"context: {context}")
