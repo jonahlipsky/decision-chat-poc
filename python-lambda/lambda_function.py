@@ -101,7 +101,6 @@ if __name__ == '__main__':
   full_prompt = assemble_prompt(prompt_json)
   bedrock_runtime = boto3.client('bedrock-runtime')
   body = haiku_input_body(full_prompt)
-  # print_models()
   model_id = "anthropic.claude-3-haiku-20240307-v1:0"
   response = bedrock_runtime.invoke_model(modelId=model_id, body=json.dumps(body))
   result = json.loads(response.get("body").read())
