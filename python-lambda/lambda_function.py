@@ -5,7 +5,9 @@ def lambda_handler(api_gateway_event, context):
   event = json.loads(api_gateway_event['body'])
 
   ### VALIDATIONS ###
-  acceptable_keys = set(['conversationStatus', 'test', 'model', 'userMessage', 'conversation'])
+  required_keys = ['conversationStatus', 'userMessage', 'conversation']
+  optional_keys = ['test', 'model']
+  acceptable_keys = set(required_keys + optional_keys)
   bad_keys = []
   for key in event:
     if key not in acceptable_keys:
@@ -17,13 +19,21 @@ def lambda_handler(api_gateway_event, context):
     lambda_proxy_error_response['body'] = f"The following keys are not permitted: {bad_keys}"
     return lambda_proxy_error_response
   
-  if 'model' in event:
-    if event['model'] not in set(['haiku', 'sonnet']):
-      lambda_proxy_error_response['body'] = f"The model is not allowed: {event['model']}"
-      return lambda_proxy_error_response
-      
+  if event.get('model') and event['model'] not in set(['haiku', 'sonnet']):
+    lambda_proxy_error_response['body'] = f"The model is not allowed: {event['model']}"
+    return lambda_proxy_error_response
+
+  missing_keys = []
+  for key in required_keys:
+    if key not in event:
+      missing_keys.append(key)
+  
+  if len(missing_keys):
+    lambda_proxy_error_response['body'] = f"The following keys are required: {missing_keys}"
+    return lambda_proxy_error_response
+  
   ### CONSTRUCT MODEL INPUT ###
-  if 'test' in event:
+  if event.get('test'):
     initial_prompt = 'Your role is to give me feedback about a decision I am trying to make.'
   else:
     initial_prompt = get_initial_prompt()
@@ -34,12 +44,15 @@ def lambda_handler(api_gateway_event, context):
     first_user_message = user_message(initial_prompt)
     next_user_message = user_message(event['userMessage'])
     conversation_messages = [first_user_message] + event['conversation'] + [next_user_message]
-
-  ### RUN MODEL INVOCATION ###
-  model_selection = event['model']
-  model_input = claude3_input_body(conversation_messages)
-  bedrock_runtime = boto3.client('bedrock-runtime')
+  
+  model_selection = event.get('model')
+  if not model_selection:
+    model_selection = 'haiku'
   model_id = claude_model_id(model_selection)
+  model_input = claude3_input_body(conversation_messages)
+  
+  ### RUN MODEL INVOCATION ###
+  bedrock_runtime = boto3.client('bedrock-runtime')
   runtime_response = bedrock_runtime.invoke_model(
     modelId=model_id, 
     body=json.dumps(model_input),
