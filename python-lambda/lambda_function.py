@@ -2,8 +2,11 @@ from package import boto3
 import json 
 
 def lambda_handler(event, context):
-  if event['test']:
+  if 'text' in event:
     return { "body": "Hello World" }
+  else:
+      print(f"event: {event}")
+      print(f"context: {context}")
   
   s3 = boto3.client('s3')
   s3_response = s3.get_object(Bucket='decisionchat', Key='initial.json')
