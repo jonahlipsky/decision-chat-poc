@@ -1,48 +1,66 @@
 from package import boto3
 import json 
 
-def lambda_handler(event, context):
-  event_json = json.loads(event['body'])
-  if 'test' in event_json:
-    return { 
-      'statusCode': 200,  
-      'isBase64Encoded': False,
-      'headers': { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }, 
-      'multiValueHeaders': {},
-      'body': "hello world"
-    }
+def lambda_handler(api_gateway_event, context):
+  event = json.loads(api_gateway_event['body'])
+  response = build_success_response()
+
+  if event['conversationStatus'] == 'beginDecisionConversation':
+    full_prompt = 'Your role is to give me feedback about a decision I am trying to make.'
+    messages = [user_message(full_prompt)]
+    model_input = haiku_input_body(messages)
   else:
-      print(f"event: {event}")
-      print(f"context: {context}")
+    initial_prompt = get_initial_prompt()
+    full_prompt = initial_prompt + event['conversation']
+
+  bedrock_runtime = boto3.client('bedrock-runtime')
+  # print_models()
+  model_id = "anthropic.claude-3-haiku-20240307-v1:0"
+  response = bedrock_runtime.invoke_model(
+    modelId=model_id, 
+    body=json.dumps(model_input),
+  )
+  result = json.loads(response.get("body").read())
+  messages.append(result)
   
+  response['body'] = json.dumps({
+    'conversationStatus': 'continueDecisionConversation',
+    'conversation': messages
+  })
+  print(response)
+  return response
+
+def get_initial_prompt():
   s3 = boto3.client('s3')
   s3_response = s3.get_object(Bucket='decisionchat', Key='initial.json')
   prompt_json = json.loads(s3_response['Body'].read())
   full_prompt = assemble_prompt(prompt_json)
-  bedrock_runtime = boto3.client('bedrock-runtime')
-  body = haiku_input_body(full_prompt)
-  # print_models()
-  model_id = "anthropic.claude-3-haiku-20240307-v1:0"
-  response = bedrock_runtime.invoke_model(modelId=model_id, body=json.dumps(body))
-  result = json.loads(response.get("body").read())
-  # print_output(result)
-  return result
+  return full_prompt
 
 def print_anthropic_models(available_models):
   for output in available_models['modelSummaries']:
     if 'anthropic' in output['modelArn']:
       print(output)
 
-def haiku_input_body(prompt):
+def user_message(prompt):
+  return {
+    "role": "user",
+    "content": [{"type": "text", "text": prompt}],
+  }
+
+def haiku_input_body(messages):
   return {
     "anthropic_version": "bedrock-2023-05-31",
     "max_tokens": 4096,
-    "messages": [
-      {
-          "role": "user",
-          "content": [{"type": "text", "text": prompt}],
-      }
-    ],
+    "messages": messages,
+  }
+
+def build_success_response():
+  return { 
+    'statusCode': 200,  
+    'isBase64Encoded': False,
+    'headers': { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }, 
+    'multiValueHeaders': {},
   }
 
 def assemble_prompt(prompt_json):
