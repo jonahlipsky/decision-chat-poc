@@ -19,7 +19,6 @@ def lambda_handler(api_gateway_event, context):
 
   model_input = haiku_input_body(conversation_messages)
   bedrock_runtime = boto3.client('bedrock-runtime')
-  # print_models()
   model_id = "anthropic.claude-3-haiku-20240307-v1:0"
   runtime_response = bedrock_runtime.invoke_model(
     modelId=model_id, 
@@ -47,7 +46,6 @@ def print_anthropic_models(available_models):
       print(output)
 
 def extract_assistant_core_response(bedrock_response):
-  print(bedrock_response)
   return {k: bedrock_response[k] for k in ('role', 'content')}
 
 
