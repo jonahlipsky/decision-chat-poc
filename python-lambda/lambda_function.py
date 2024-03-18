@@ -5,21 +5,19 @@ def lambda_handler(api_gateway_event, context):
   event = json.loads(api_gateway_event['body'])
   lambda_proxy_response = build_success_response()
 
-  if event['conversationStatus'] == 'beginDecisionConversation' and 'test' in event:
-    full_prompt = 'Your role is to give me feedback about a decision I am trying to make.'
-    conversation_messages = [user_message(full_prompt)]
-    model_input = haiku_input_body(conversation_messages)
-  elif event['conversationStatus'] == 'beginDecisionConversation':
-    full_prompt = get_initial_prompt()
-    conversation_messages = [user_message(full_prompt)]
-    model_input = haiku_input_body(conversation_messages)
+  if 'test' in event:
+    initial_prompt = 'Your role is to give me feedback about a decision I am trying to make.'
   else:
     initial_prompt = get_initial_prompt()
+
+  if event['conversationStatus'] == 'beginDecisionConversation':
+    conversation_messages = [user_message(initial_prompt)]
+  elif event['conversationStatus'] == 'continueDecisionConversation':
     first_user_message = user_message(initial_prompt)
     next_user_message = user_message(event['user_message'])
     conversation_messages = [first_user_message] + event['conversation'] + [next_user_message]
-    model_input = haiku_input_body(conversation_messages)
 
+  model_input = haiku_input_body(conversation_messages)
   bedrock_runtime = boto3.client('bedrock-runtime')
   # print_models()
   model_id = "anthropic.claude-3-haiku-20240307-v1:0"
