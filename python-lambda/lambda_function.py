@@ -5,8 +5,12 @@ def lambda_handler(api_gateway_event, context):
   event = json.loads(api_gateway_event['body'])
   lambda_proxy_response = build_success_response()
 
-  if event['conversationStatus'] == 'beginDecisionConversation':
+  if event['conversationStatus'] == 'beginDecisionConversation' and 'test' in event:
     full_prompt = 'Your role is to give me feedback about a decision I am trying to make.'
+    conversation_messages = [user_message(full_prompt)]
+    model_input = haiku_input_body(conversation_messages)
+  elif event['conversationStatus'] == 'beginDecisionConversation':
+    full_prompt = get_initial_prompt()
     conversation_messages = [user_message(full_prompt)]
     model_input = haiku_input_body(conversation_messages)
   else:
@@ -25,7 +29,7 @@ def lambda_handler(api_gateway_event, context):
   
   lambda_proxy_response['body'] = json.dumps({
     'conversationStatus': 'continueDecisionConversation',
-    'conversation': conversation_messages
+    'conversation': conversation_messages[1:]
   })
   return lambda_proxy_response
 
