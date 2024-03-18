@@ -3,12 +3,12 @@ import json
 
 def lambda_handler(api_gateway_event, context):
   event = json.loads(api_gateway_event['body'])
-  response = build_success_response()
+  lambda_proxy_response = build_success_response()
 
   if event['conversationStatus'] == 'beginDecisionConversation':
     full_prompt = 'Your role is to give me feedback about a decision I am trying to make.'
-    messages = [user_message(full_prompt)]
-    model_input = haiku_input_body(messages)
+    conversation_messages = [user_message(full_prompt)]
+    model_input = haiku_input_body(conversation_messages)
   else:
     initial_prompt = get_initial_prompt()
     full_prompt = initial_prompt + event['conversation']
@@ -16,19 +16,18 @@ def lambda_handler(api_gateway_event, context):
   bedrock_runtime = boto3.client('bedrock-runtime')
   # print_models()
   model_id = "anthropic.claude-3-haiku-20240307-v1:0"
-  response = bedrock_runtime.invoke_model(
+  runtime_response = bedrock_runtime.invoke_model(
     modelId=model_id, 
     body=json.dumps(model_input),
   )
-  result = json.loads(response.get("body").read())
-  messages.append(result)
+  result = json.loads(runtime_response.get("body").read())
+  conversation_messages.append(result)
   
-  response['body'] = json.dumps({
+  lambda_proxy_response['body'] = json.dumps({
     'conversationStatus': 'continueDecisionConversation',
-    'conversation': messages
+    'conversation': conversation_messages
   })
-  print(response)
-  return response
+  return lambda_proxy_response
 
 def get_initial_prompt():
   s3 = boto3.client('s3')
