@@ -15,7 +15,10 @@ def lambda_handler(api_gateway_event, context):
     model_input = haiku_input_body(conversation_messages)
   else:
     initial_prompt = get_initial_prompt()
-    full_prompt = initial_prompt + event['conversation']
+    first_user_message = user_message(initial_prompt)
+    next_user_message = user_message(event['user_message'])
+    conversation_messages = [first_user_message] + event['conversation'] + [next_user_message]
+    model_input = haiku_input_body(conversation_messages)
 
   bedrock_runtime = boto3.client('bedrock-runtime')
   # print_models()
@@ -24,8 +27,8 @@ def lambda_handler(api_gateway_event, context):
     modelId=model_id, 
     body=json.dumps(model_input),
   )
-  result = json.loads(runtime_response.get("body").read())
-  conversation_messages.append(result)
+  bedrock_result = json.loads(runtime_response.get("body").read())
+  conversation_messages.append(extract_assistant_core_response(bedrock_result))
   
   lambda_proxy_response['body'] = json.dumps({
     'conversationStatus': 'continueDecisionConversation',
@@ -44,6 +47,11 @@ def print_anthropic_models(available_models):
   for output in available_models['modelSummaries']:
     if 'anthropic' in output['modelArn']:
       print(output)
+
+def extract_assistant_core_response(bedrock_response):
+  print(bedrock_response)
+  return {k: bedrock_response[k] for k in ('role', 'content')}
+
 
 def user_message(prompt):
   return {
