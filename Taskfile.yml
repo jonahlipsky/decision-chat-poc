@@ -32,3 +32,8 @@ tasks:
   update_python_lambda_code:
     cmds: 
       - aws lambda update-function-code --function-name $HAIKU_FN_NAME --zip-file fileb://$LAMBDA_FN_LOCATION$HAIKU_ZIP_NAME
+
+  zip_and_update:
+    cmds:
+      - task: zip_python_lambda
+      - task: update_python_lambda_code
