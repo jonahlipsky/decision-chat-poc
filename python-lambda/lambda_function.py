@@ -106,7 +106,3 @@ if __name__ == '__main__':
   response = bedrock_runtime.invoke_model(modelId=model_id, body=json.dumps(body))
   result = json.loads(response.get("body").read())
   print_output(result)
-
-  # for event in response.get("body"):
-  #   chunk = json.loads(event["chunk"]["bytes"])["completion"]
-  #   print(chunk)
