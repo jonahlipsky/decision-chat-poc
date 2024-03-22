@@ -1,10 +1,29 @@
-export interface IClaudeCompletion {
-  completion: string;
-  stop: string;
-  stop_reason: string;
-  message?: string;
+export enum ConversationStatuses {
+  Begin = "beginDecisionConversation",
+  Continue = "continueDecisionConversation"
 }
 
-export interface ICompletionWithFulltext extends IClaudeCompletion {
-  fullText: string;
+export enum Role {
+  User = "User",
+  Assistant = "Assistant"
+}
+
+export interface conversationContent {
+  type: string,
+  text: string
+}
+
+export interface structuredConversation {
+  role: Role.User | Role.Assistant,
+  content: conversationContent
+}
+
+export interface fullConversation {
+  conversationStatus: string;
+  conversation: structuredConversation[];
+}
+
+export interface completionRequest extends fullConversation {
+  userMessage: string;
+  test?: boolean
 }

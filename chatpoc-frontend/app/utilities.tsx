@@ -1,46 +1,28 @@
 "use client";
-import { IClaudeCompletion, ICompletionWithFulltext } from "@/app/types";
-import { getInitialPrompt, getApiEndpoint } from "./actions";
+import { completionRequest, fullConversation } from "@/app/types";
+import { getApiEndpoint, getInitialRequest } from "./actions";
 
 export async function startChat() {
-  const initialPrompt = await getInitialPrompt();
+  const initialPrompt: completionRequest = await getInitialRequest();
   return await continueChat(initialPrompt);
 }
 
-export async function continueChat(prompt: string) {
+export async function continueChat(completionRequest: completionRequest) {
   const apiUrl = await getApiEndpoint();
-  // const apiKey = await getApiKey();
   const url: URL = new URL(apiUrl);
-  const modelPrompt = JSON.stringify({
-    prompt: prompt + "\n\nAssistant:",
-  });
+  const promptBody = JSON.stringify(completionRequest);
   
   return fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      // "X-Api-Key": apiKey
     },
-    body: modelPrompt,
+    body: promptBody,
   })
     .then(function (response) {
       return response.json();
     })
-    .then(function (data: IClaudeCompletion) {
-      if (data.stop_reason && data.stop_reason != "stop_sequence") {
-        const fullErrorResponse: ICompletionWithFulltext = {
-          fullText: prompt,
-          ...data,
-        };
-        fullErrorResponse.message = data.stop_reason;
-        return fullErrorResponse;
-      }
-
-      const fullText = {
-        fullText: prompt + "\n\nAssistant:" + data.completion,
-      };
-
-      const fullResponse: ICompletionWithFulltext = { ...fullText, ...data };
-      return fullResponse;
+    .then(function (data: fullConversation) {
+      return data;
     });
 }
