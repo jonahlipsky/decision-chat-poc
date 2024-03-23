@@ -90,10 +90,10 @@ export default function Home() {
       <div>
         <p className="mb-5">
           This is an experimental A.I. chat application that provides feedback
-          on life decisions. It leverages the "Claude 3 Haiku" model published
-          by Anthropic AI. It is based on the creator's college thesis which
+          on life decisions. It leverages the &quot;Claude 3 Haiku&quot; model published
+          by Anthropic AI. It is based on the creator&apos;s college thesis which
           focused on decision making and life choices. The thesis is used as a
-          baseline input into the model, which is guided to use "the text" as
+          baseline input into the model, which is guided to use &quot;the text&quot; as
           the theory that it gives you feedback with. The paper focused on
           Prospect Theory, a cognitive psychology theory that gave birth to the
           field of Behavioral Economics. If a Prospect Theory concept is
