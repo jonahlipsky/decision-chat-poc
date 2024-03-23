@@ -39,7 +39,10 @@ def lambda_handler(api_gateway_event, context):
     initial_prompt = get_initial_prompt()
 
   if event['conversationStatus'] == 'beginDecisionConversation':
-    conversation_messages = [user_message(initial_prompt)]
+    conversation_messages = [assistant_first_message()]
+    begin_convo_response = build_response(200)
+    begin_convo_response['body'] = build_response_body(conversation_messages)
+    return begin_convo_response
   elif event['conversationStatus'] == 'continueDecisionConversation':
     first_user_message = user_message(initial_prompt)
     next_user_message = user_message(event['userMessage'])
@@ -62,10 +65,7 @@ def lambda_handler(api_gateway_event, context):
   ## BUILD AND RETURN RESULT ###
   conversation_messages.append(extract_assistant_core_response(bedrock_result))
   lambda_proxy_response = build_response(200)
-  lambda_proxy_response['body'] = json.dumps({
-    'conversationStatus': 'continueDecisionConversation',
-    'conversation': conversation_messages[1:]
-  })
+  lambda_proxy_response['body'] = build_response_body(conversation_messages[1:])
   return lambda_proxy_response
 
 ######################
@@ -94,6 +94,12 @@ def print_anthropic_models(available_models):
 def extract_assistant_core_response(bedrock_response):
   return {k: bedrock_response[k] for k in ('role', 'content')}
 
+def assistant_first_message():
+  return {
+    "role": "assistant",
+    "content": [{"type": "text", "text": "What decision are you trying to make?"}]
+  }
+
 def user_message(prompt):
   return {
     "role": "user",
@@ -106,6 +112,12 @@ def claude3_input_body(messages):
     "max_tokens": 4096,
     "messages": messages,
   }
+
+def build_response_body(conversation_messages):
+  return json.dumps({
+      'conversationStatus': 'continueDecisionConversation',
+      'conversation': conversation_messages
+    })
 
 def build_response(response_code):
   return { 
