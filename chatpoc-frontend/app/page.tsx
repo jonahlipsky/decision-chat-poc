@@ -1,15 +1,20 @@
 "use client";
 import { useEffect, useState } from "react";
 import { startChat, continueChat } from "./utilities";
-import { ICompletionWithFulltext } from "@/app/types";
+import { ConversationStatuses, fullConversation, completionRequest } from "@/app/types";
 
 export default function Home() {
   const defaultAllTextState: string[] = [
     "Enter your own text here to talk to Claude 2:",
   ];
 
+  const defaultConversation: fullConversation = {
+    conversationStatus: ConversationStatuses.Begin,
+    conversation: [],
+  }
+
   const [errorMessage, setErrorMessage] = useState("");
-  const [fullConversation, setFullConversation] = useState("");
+  const [conversationState, setConversationState] = useState(defaultConversation)
   const [alltext, setAllText] = useState(defaultAllTextState);
   const [userInput, setUserInput] = useState("");
   const [status, setStatus] = useState("typing"); // typing, submitted, submitting, error
@@ -27,61 +32,52 @@ export default function Home() {
     }
   }
 
-  function splitConversation(fullText: string): string[] {
-    // This relies on the first human prompt not including the \n\n pattern.
-    // That makes it a little brittle.
+  function extractConversationText(fullConvo: fullConversation): string[] {
+    const text: string[] = []
+    
+    fullConvo.conversation.forEach(dialogue => {
+      const capitalizedRole = dialogue.role[0].toUpperCase() + dialogue.role.slice(1)
+      const line: string = capitalizedRole + ": " + dialogue.content[0].text
+      text.push(line)
+    })
 
-    const pairs = fullText.split("\n\nHuman:");
-    const result: string[] = [];
-    // need to handle the first one which won't split on the sequence
-
-    pairs.forEach((pair, idx) => {
-      // Basically, only change "human" to "system prompt"
-      // if they've selected the decision chat.
-      if (idx == 0 && chatState == DECISIONSTATE) {
-        pair = pair.replace("Human:", "System Prompt:");
-      } else if (idx != 0) {
-        pair = "Human:" + pair;
-      }
-
-      const separatedReqResp = pair.split("\n\nAssistant:");
-      result.push(separatedReqResp[0]);
-      result.push("Assistant:" + separatedReqResp[1]);
-    });
-    return result;
+    return text
   }
 
   async function startDecisionChat() {
     setChatState(DECISIONSTATE);
-    startChat().then(function (response: ICompletionWithFulltext) {
-      const splitFulltext = splitConversation(response.fullText);
+    startChat().then(function (response: fullConversation) {
+      setConversationState(response)
+      const splitFulltext = extractConversationText(response);
       setAllText([...splitFulltext]);
-      setFullConversation(response.fullText);
     });
   }
 
   useEffect(() => {
     if (status == "submitted") {
       setStatus("submitting");
-      let humanPrefix: string = "\n\nHuman: ";
       if (chatState === WAITINGSTATE) {
-        humanPrefix = "Human: ";
         setChatState(FREECHATSTATE);
       }
-      const nextPrompt = fullConversation + humanPrefix + userInput;
-      continueChat(nextPrompt).then(function (
-        response: ICompletionWithFulltext
+
+      const completionReq: completionRequest = {
+        userMessage: userInput,
+        conversation: conversationState.conversation,
+        conversationStatus: conversationState.conversationStatus
+      }
+
+      continueChat(completionReq).then(function (
+        response: fullConversation
       ) {
-        if (response.message) {
-          setErrorMessage(response.message);
-          setStatus("error");
-        } else {
-          const splitFulltext = splitConversation(response.fullText);
-          setUserInput("");
-          setAllText([...splitFulltext]);
-          setFullConversation(response.fullText);
-          setStatus("typing");
-        }
+        // if (response.message) {
+        //   setErrorMessage(response.message);
+        //   setStatus("error");
+        // } else {
+        setConversationState(response);
+        const splitFulltext = extractConversationText(response);
+        setUserInput("");
+        setAllText([...splitFulltext]);
+        setStatus("typing");
       });
     }
   }, [status]);

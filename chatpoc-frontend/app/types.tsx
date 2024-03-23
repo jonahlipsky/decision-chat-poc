@@ -15,7 +15,7 @@ export interface conversationContent {
 
 export interface structuredConversation {
   role: Role.User | Role.Assistant,
-  content: conversationContent
+  content: conversationContent[]
 }
 
 export interface fullConversation {

@@ -1,6 +1,7 @@
 "use client";
 import { completionRequest, fullConversation } from "@/app/types";
-import { getApiEndpoint, getInitialRequest } from "./actions";
+import { getApiEndpointAndStage, getInitialRequest } from "./actions";
+
 
 export async function startChat() {
   const initialPrompt: completionRequest = await getInitialRequest();
@@ -8,7 +9,10 @@ export async function startChat() {
 }
 
 export async function continueChat(completionRequest: completionRequest) {
-  const apiUrl = await getApiEndpoint();
+  const [apiUrl, stage] = await getApiEndpointAndStage();
+  if (stage == "dev") {
+    completionRequest.test = true
+  }
   const url: URL = new URL(apiUrl);
   const promptBody = JSON.stringify(completionRequest);
   

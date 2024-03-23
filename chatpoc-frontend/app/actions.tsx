@@ -9,12 +9,9 @@ export async function getInitialRequest(){
     userMessage: ""
   }
 
-  if (process.env.STAGE! == "dev") {
-    initial.test = true
-  }
   return initial
 }
 
-export async function getApiEndpoint(){
-  return process.env.CHAT_API_ENDPOINT!
+export async function getApiEndpointAndStage(){
+  return [process.env.CHAT_API_ENDPOINT!, process.env.STAGE!]
 }
