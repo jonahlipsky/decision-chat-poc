@@ -111,7 +111,11 @@ def build_response(response_code):
   return { 
     'statusCode': response_code,  
     'isBase64Encoded': False,
-    'headers': { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }, 
+    'headers': { 
+      'Content-Type': 'application/json', 
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, X-Api-Key' 
+    }, 
     'multiValueHeaders': {},
   }
 
