@@ -13,5 +13,8 @@ export async function getInitialRequest(){
 }
 
 export async function getApiEndpointAndStage(){
-  return [process.env.CHAT_API_ENDPOINT!, process.env.STAGE!]
+  console.log(`RETURNING API ENDPOINT: ${process.env.CHAT_API_ENDPOINT!}`)
+  console.log(`RETURNING STAGE: ${process.env.VERCEL_ENV!}`)
+
+  return [process.env.CHAT_API_ENDPOINT!, process.env.VERCEL_ENV!]
 }

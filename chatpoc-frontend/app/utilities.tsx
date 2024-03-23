@@ -10,7 +10,9 @@ export async function startChat() {
 
 export async function continueChat(completionRequest: completionRequest) {
   const [apiUrl, stage] = await getApiEndpointAndStage();
-  if (stage == "dev") {
+  console.log(`apiUrl: ${apiUrl}`)
+  console.log(`stage: ${stage}`)
+  if (stage == "development") {
     completionRequest.test = true
   }
   const url: URL = new URL(apiUrl);
