@@ -15,7 +15,7 @@ export async function continueChat(completionRequest: completionRequest) {
   if (stage == "development") {
     completionRequest.test = true
   }
-  const url: URL = new URL(apiUrl);
+  const url: URL = new URL("https://b9u3m6pnec.execute-api.us-east-1.amazonaws.com/test/haikupoc");
   const promptBody = JSON.stringify(completionRequest);
   
   return fetch(url, {
