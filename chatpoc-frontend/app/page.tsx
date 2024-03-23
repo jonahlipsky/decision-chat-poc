@@ -90,19 +90,21 @@ export default function Home() {
       <div>
         <p className="mb-5">
           This is an experimental A.I. chat application that provides feedback
-          on life decisions. It leverages the &quot;Claude 3 Haiku&quot; model published
-          by Anthropic AI. It is based on the creator&apos;s college thesis which
-          focused on decision making and life choices. The thesis is used as a
-          baseline input into the model, which is guided to use &quot;the text&quot; as
-          the theory that it gives you feedback with. The paper focused on
-          Prospect Theory, a cognitive psychology theory that gave birth to the
-          field of Behavioral Economics. If a Prospect Theory concept is
-          mentioned and you want more of an explanation, ask about it! The only
-          other guidance is that the model prompt is geared towards personal
-          life choices, which was the focal point of the paper. Presenting a
-          hypothetical or real life choice will yield the intended results of
-          this experiment. Click the following button to start a chat about
-          decision making! You can refresh the page to reset.
+          on life decisions. It leverages the &quot;Claude 3 Haiku&quot; model
+          published by Anthropic AI. It is based on the creator&apos;s college
+          thesis which focused on decision making and life choices. The thesis
+          is used as a baseline input into the model, which is guided to use
+          &quot;the text&quot; as the basis for it&apos;s responses. The paper
+          focused on Prospect Theory, a cognitive psychology theory that gave
+          birth to the field of Behavioral Economics. If a concept from Prospect
+          Theory is mentioned and you want more of an explanation, ask about it!
+          The only other guidance is that this experiment is geared towards
+          personal life choices, which was the focal point of the paper. An
+          example might be a choice about whether to move from your current home
+          to another, whether to start a family, whether to change careers, etc.
+          Presenting a hypothetical or real life choice will yield the intended
+          results of this experiment. Click the following button to start a chat
+          about decision making! You can refresh the page to reset.
         </p>
         <button
           hidden={chatState != WAITINGSTATE}
@@ -115,8 +117,8 @@ export default function Home() {
       <div>
         {alltext.map((text, id) => {
           let color = id % 2 == 0 ? "black" : "text-cyan-500";
-          if (chatState == WAITINGSTATE){
-            color = "black"
+          if (chatState == WAITINGSTATE) {
+            color = "black";
           }
           return (
             <p className={"mb-5 " + color} key={id}>
