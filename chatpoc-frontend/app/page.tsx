@@ -1,20 +1,25 @@
 "use client";
 import { useEffect, useState } from "react";
 import { startChat, continueChat } from "./utilities";
-import { ConversationStatuses, fullConversation, completionRequest } from "@/app/types";
+import {
+  ConversationStatuses,
+  fullConversation,
+  completionRequest,
+} from "@/app/types";
 
 export default function Home() {
   const defaultAllTextState: string[] = [
-    "Enter your own text here to talk to Claude 2:",
+    "Enter your own text here to talk to Claude 3:",
   ];
 
   const defaultConversation: fullConversation = {
     conversationStatus: ConversationStatuses.Begin,
     conversation: [],
-  }
+  };
 
   const [errorMessage, setErrorMessage] = useState("");
-  const [conversationState, setConversationState] = useState(defaultConversation)
+  const [conversationState, setConversationState] =
+    useState(defaultConversation);
   const [alltext, setAllText] = useState(defaultAllTextState);
   const [userInput, setUserInput] = useState("");
   const [status, setStatus] = useState("typing"); // typing, submitted, submitting, error
@@ -33,21 +38,22 @@ export default function Home() {
   }
 
   function extractConversationText(fullConvo: fullConversation): string[] {
-    const text: string[] = []
-    
-    fullConvo.conversation.forEach(dialogue => {
-      const capitalizedRole = dialogue.role[0].toUpperCase() + dialogue.role.slice(1)
-      const line: string = capitalizedRole + ": " + dialogue.content[0].text
-      text.push(line)
-    })
+    const text: string[] = [];
 
-    return text
+    fullConvo.conversation.forEach((dialogue) => {
+      const capitalizedRole =
+        dialogue.role[0].toUpperCase() + dialogue.role.slice(1);
+      const line: string = capitalizedRole + ": " + dialogue.content[0].text;
+      text.push(line);
+    });
+
+    return text;
   }
 
   async function startDecisionChat() {
     setChatState(DECISIONSTATE);
     startChat().then(function (response: fullConversation) {
-      setConversationState(response)
+      setConversationState(response);
       const splitFulltext = extractConversationText(response);
       setAllText([...splitFulltext]);
     });
@@ -63,12 +69,10 @@ export default function Home() {
       const completionReq: completionRequest = {
         userMessage: userInput,
         conversation: conversationState.conversation,
-        conversationStatus: conversationState.conversationStatus
-      }
+        conversationStatus: conversationState.conversationStatus,
+      };
 
-      continueChat(completionReq).then(function (
-        response: fullConversation
-      ) {
+      continueChat(completionReq).then(function (response: fullConversation) {
         // if (response.message) {
         //   setErrorMessage(response.message);
         //   setStatus("error");
@@ -86,14 +90,19 @@ export default function Home() {
       <div>
         <p className="mb-5">
           This is an experimental A.I. chat application that provides feedback
-          on life decisions. It leverages the Claude 2 model published by
-          Anthropic AI. It is not intended to give you advice so much as to
-          present a reflection of what you give it. To that end, it&apos;s more
-          interesting if you give it information about a real decision you are
-          trying to make; then you can judge for yourself the quality of its
-          response. Click the following button to start a chat about decision
-          making or start your own by entering text to the right and hitting
-          &apos;submit&apos;. You can refresh the page to reset.
+          on life decisions. It leverages the "Claude 3 Haiku" model published
+          by Anthropic AI. It is based on the creator's college thesis which
+          focused on decision making and life choices. The thesis is used as a
+          baseline input into the model, which is guided to use "the text" as
+          the theory that it gives you feedback with. The paper focused on
+          Prospect Theory, a cognitive psychology theory that gave birth to the
+          field of Behavioral Economics. If a Prospect Theory concept is
+          mentioned and you want more of an explanation, ask about it! The only
+          other guidance is that the model prompt is geared towards personal
+          life choices, which was the focal point of the paper. Presenting a
+          hypothetical or real life choice will yield the intended results of
+          this experiment. Click the following button to start a chat about
+          decision making! You can refresh the page to reset.
         </p>
         <button
           hidden={chatState != WAITINGSTATE}
