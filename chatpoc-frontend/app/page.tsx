@@ -106,7 +106,7 @@ export default function Home() {
         </p>
         <button
           hidden={chatState != WAITINGSTATE}
-          className="border border-cyan-300 p-1 rounded-md text-cyan-300"
+          className="border border-black p-1 rounded-md "
           onClick={startDecisionChat}
         >
           Chat About Decisions
@@ -114,7 +114,10 @@ export default function Home() {
       </div>
       <div>
         {alltext.map((text, id) => {
-          const color = id % 2 == 0 ? "text-cyan-300" : "text-rose-300";
+          let color = id % 2 == 0 ? "black" : "text-cyan-500";
+          if (chatState == WAITINGSTATE){
+            color = "black"
+          }
           return (
             <p className={"mb-5 " + color} key={id}>
               {text}
@@ -134,7 +137,7 @@ export default function Home() {
           }
         />
         <button
-          className="border rounded-md border-white p-1"
+          className="border rounded-md border-black p-1"
           disabled={status === "submitted" || status === "submitting"}
           onClick={handleSubmitResponse}
         >
