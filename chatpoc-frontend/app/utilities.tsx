@@ -1,6 +1,6 @@
 "use client";
 import { completionRequest, fullConversation } from "@/app/types";
-import { getApiEndpointAndStage, getInitialRequest } from "./actions";
+import { getStage, getInitialRequest } from "./actions";
 
 
 export async function startChat() {
@@ -9,13 +9,11 @@ export async function startChat() {
 }
 
 export async function continueChat(completionRequest: completionRequest) {
-  const [apiUrl, stage] = await getApiEndpointAndStage();
-  console.log(`apiUrl: ${apiUrl}`)
-  console.log(`stage: ${stage}`)
+  const stage = await getStage();
   if (stage == "development") {
     completionRequest.test = true
   }
-  const url: URL = new URL(apiUrl);
+  const url: URL = new URL("https://b9u3m6pnec.execute-api.us-east-1.amazonaws.com/test/haikupoc");
   const promptBody = JSON.stringify(completionRequest);
   
   return fetch(url, {
